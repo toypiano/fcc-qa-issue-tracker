@@ -14,6 +14,8 @@ var ObjectId = require('mongodb').ObjectID;
 
 const CONNECTION_STRING = process.env.DB; //MongoClient.connect(CONNECTION_STRING, function(err, db) {});
 
+const uri = process.env.MONGO_URI;
+
 module.exports = function (app) {
   app
     .route('/api/issues/:project')
@@ -31,7 +33,7 @@ module.exports = function (app) {
 
       // Use node version 2.2.12 or later in Atlas connect settings and wrap your uri with quotations
       // https://forum.freecodecamp.org/t/mongoerror-cannot-do-raw-queries-on-admin-in-atlas-for-advanced-node-and-express-challenge/268294
-      MongoClient.connect(process.env.MONGO_URI, (err, db) => {
+      MongoClient.connect(uri, (err, db) => {
         var collection = db.collection(project);
         // find documents with query
         // .find returns cursor. Convert it to an array and send in response
@@ -46,17 +48,39 @@ module.exports = function (app) {
 
     .post(function (req, res) {
       var project = req.params.project;
-      // Create a document from the req.body
-
       // Validate the input
+      // - title, text, created_by are required
+      if (
+        !req.body.issue_title ||
+        !req.body.issue_text ||
+        !req.body.created_by
+      ) {
+        res.send('Required input values are missing');
+      }
+
+      // Create a document from the req.body
+      var issue = {
+        issue_title: req.body.issue_title,
+        issue_text: req.body.issue_text,
+        created_by: req.body.created_by,
+        assigned_to: req.body.assigned_to || '',
+        status_text: req.body.status_text || '',
+        created_on: new Date(),
+        updated_on: new Date(),
+        open: true,
+      };
 
       // Connect with MongoClient and get collection from passed db
-
-      // Insert document into collection
-
-      // Add _id field to the document from the insert result
-
-      // Send response with document
+      MongoClient.connect(uri, (err, db) => {
+        var collection = db.collection(project);
+        // Insert document into collection
+        collection.insertOne(issue, (err, doc) => {
+          // Add _id field to the document from the insert result
+          issue._id = doc.insertedId;
+          // Send response with document
+          res.json(issue);
+        });
+      });
     })
 
     .put(function (req, res) {
