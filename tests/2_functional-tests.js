@@ -85,8 +85,8 @@ suite('Functional Tests', function () {
           assert.property(res.body, 'updated_on');
           assert.property(res.body, 'open');
 
-          assert.equal(res.body.issue_title, 'Title');
-          assert.equal(res.body.issue_text, 'text');
+          assert.equal(res.body.issue_title, 'Title2');
+          assert.equal(res.body.issue_text, 'text2');
           assert.equal(
             res.body.created_by,
             'Functional Test - Every field filled in'
@@ -188,7 +188,7 @@ suite('Functional Tests', function () {
           .request(server)
           .get('/api/issues/test')
           .query({
-            issue_title: 'New Title',
+            issue_title: 'Title',
           })
           .end((err, res) => {
             assert.equal(res.status, 200);
@@ -204,8 +204,8 @@ suite('Functional Tests', function () {
             assert.property(res.body[0], 'status_text');
             assert.property(res.body[0], '_id');
 
-            assert.equal(res.body[0].issue_title, 'New Title');
-            assert.equal(res.bod[0].issue_text, 'text');
+            assert.equal(res.body[0].issue_title, 'Title');
+            assert.equal(res.body[0].issue_text, 'text');
             assert.equal(
               res.body[0].created_by,
               'Functional Test - Every field filled in'
@@ -222,8 +222,8 @@ suite('Functional Tests', function () {
           .request(server)
           .get('/api/issues/test')
           .query({
-            issue_title: 'New Title',
-            issue_text: 'new text',
+            issue_title: 'Title',
+            issue_text: 'text',
           })
           .end((err, res) => {
             assert.equal(res.status, 200);
@@ -239,14 +239,14 @@ suite('Functional Tests', function () {
             assert.property(res.body[0], 'status_text');
             assert.property(res.body[0], '_id');
 
-            assert.equal(res.body[0].issue_title, 'New Title');
-            assert.equal(res.bod[0].issue_text, 'New Text');
+            assert.equal(res.body[0].issue_title, 'Title');
+            assert.equal(res.body[0].issue_text, 'text');
             assert.equal(
               res.body[0].created_by,
               'Functional Test - Every field filled in'
             );
-            assert.equal(res.body[0].assigned_to, '');
-            assert.equal(res.body[0].status_text, '');
+            assert.equal(res.body[0].assigned_to, 'Chai and Mocha');
+            assert.equal(res.body[0].status_text, 'In QA');
             assert.strictEqual(res.body[0].open, true);
             done();
           });

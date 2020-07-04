@@ -55,7 +55,7 @@ module.exports = function (app) {
         !req.body.issue_text ||
         !req.body.created_by
       ) {
-        res.status(422).send('Required input values are missing');
+        return res.status(422).send('Required input values are missing');
       }
 
       // Create a document from the req.body
@@ -78,7 +78,7 @@ module.exports = function (app) {
           // Add _id field to the document from the insert result
           issue._id = doc.insertedId;
           // Send response with document
-          res.json(issue);
+          return res.json(issue);
         });
       });
     })
@@ -86,12 +86,46 @@ module.exports = function (app) {
     .put(function (req, res) {
       var project = req.params.project;
       // Get document _id from req.body
-
+      var _id = req.body._id;
       // If no fields are sent return 'no updated field sent'
+      delete req.body._id;
+      if (typeof req.body.open === 'boolean') {
+        // Stringify boolean value so that it won't be deleted for false value;
+        req.body.open = String(req.body.open);
+      }
 
+      for (var field in req.body) {
+        // delete all fields with null/undefined values
+        if (!req.body[field]) {
+          delete req.body[field];
+        }
+      }
+      if (Object.keys(req.body).length === 0) {
+        // If no fields left after deleting empty fields
+        return res.status(422).send('no updated field sent');
+      }
+      // Convert open's
+      if (req.body.open) {
+        req.body.open = req.body.open === 'true';
+      }
       // Find the document from DB and update (should always update 'updated_on')
-
-      // Return 'successfully updated' ot 'could no update ' + _id
+      MongoClient.connect(uri, (err, db) => {
+        var collection = db.collection(project);
+        collection.findOneAndUpdate(
+          // You MUST convert _id from body(string) to ObjectId instance when making query
+          { _id: new ObjectId(_id) },
+          { $set: req.body },
+          (err, doc) => {
+            // Return 'successfully updated' ot 'could not update ' + _id
+            if (err) {
+              console.log(doc);
+              return res.send('could not update ' + _id);
+            } else {
+              return res.send('successfully updated');
+            }
+          }
+        );
+      });
     })
 
     .delete(function (req, res) {
