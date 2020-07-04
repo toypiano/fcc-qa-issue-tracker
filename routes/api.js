@@ -21,6 +21,7 @@ module.exports = function (app) {
     .get(function (req, res) {
       var project = req.params.project;
       // get query object to filter request
+      var query = req.query;
 
       // convert query._id to ObjectId
 
@@ -28,9 +29,19 @@ module.exports = function (app) {
 
       // connect with MongoClient and get collection from db
 
-      // find documents with query
-
-      // .find returns cursor. Convert it to an array and send in response
+      // Use node version 2.2.12 or later in Atlas connect settings and wrap your uri with quotations
+      // https://forum.freecodecamp.org/t/mongoerror-cannot-do-raw-queries-on-admin-in-atlas-for-advanced-node-and-express-challenge/268294
+      MongoClient.connect(process.env.MONGO_URI, (err, db) => {
+        var collection = db.collection(project);
+        // find documents with query
+        // .find returns cursor. Convert it to an array and send in response
+        collection.find(query).toArray((err, docs) => {
+          if (err) {
+            console.log('Error connecting to MongoDB', err);
+          }
+          return res.json(docs);
+        });
+      });
     })
 
     .post(function (req, res) {
