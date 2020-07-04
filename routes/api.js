@@ -26,9 +26,13 @@ module.exports = function (app) {
       var query = req.query;
 
       // convert query._id to ObjectId
-
+      if (query._id) {
+        query._id = new ObjectId(query._id);
+      }
       // convert query.open to boolean
-
+      if (typeof query.open === 'string') {
+        query.open = query.open === 'true';
+      }
       // connect with MongoClient and get collection from db
 
       // Use node version 2.2.12 or later in Atlas connect settings and wrap your uri with quotations
