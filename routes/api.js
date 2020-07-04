@@ -55,7 +55,7 @@ module.exports = function (app) {
         !req.body.issue_text ||
         !req.body.created_by
       ) {
-        res.send('Required input values are missing');
+        res.status(422).send('Required input values are missing');
       }
 
       // Create a document from the req.body
