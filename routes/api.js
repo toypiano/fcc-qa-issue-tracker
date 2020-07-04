@@ -131,11 +131,25 @@ module.exports = function (app) {
     .delete(function (req, res) {
       var project = req.params.project;
       // Get _id from req.body (return '_id error' if no _id is sent)
-
+      var _id = req.body._id;
+      if (!_id) {
+        return res.status(422).send('_id error');
+      }
       // Delete the matching document
-
-      // Success: 'deleted ' + _id
-
-      // Failed: 'could not delete ' + _id
+      MongoClient.connect(uri, (err, db) => {
+        var collection = db.collection(project);
+        collection.findOneAndDelete(
+          { _id: new ObjectId(_id) },
+          (err, result) => {
+            // Failed: 'could not delete ' + _id
+            if (err) {
+              return res.send('could not delete ' + _id);
+            } else {
+              // Success: 'deleted ' + _id
+              return res.send('deleted ' + _id);
+            }
+          }
+        );
+      });
     });
 };

@@ -260,13 +260,14 @@ suite('Functional Tests', function () {
         .request(server)
         .delete('/api/issues/test')
         .end((err, res) => {
-          assert.equal(res.status, 404);
+          assert.equal(res.status, 422);
           assert.equal(res.text, '_id error');
+          done();
         });
     });
 
     test('Valid _id', function (done) {
-      chaiHttp
+      chai
         .request(server)
         .delete('/api/issues/test')
         .send({
